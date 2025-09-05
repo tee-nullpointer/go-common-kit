@@ -4,11 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"go-common-kit/pkg/logger"
 	"net/http"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/tee-nullpointer/go-common-kit/pkg/logger"
 	"go.uber.org/zap"
 )
 

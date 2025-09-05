@@ -2,10 +2,10 @@ package common_middleware
 
 import (
 	"bytes"
-	"go-common-kit/pkg/logger"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/tee-nullpointer/go-common-kit/pkg/logger"
 	"go.uber.org/zap"
 )
 

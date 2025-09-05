@@ -2,16 +2,16 @@ package main
 
 import (
 	"fmt"
-	common_handler "go-common-kit/handler"
-	common_middleware "go-common-kit/middleware"
-	"go-common-kit/pkg/env"
-	"go-common-kit/pkg/logger"
-	"go-common-kit/server"
 	"os"
 	"os/signal"
 	"syscall"
 
 	"github.com/gin-gonic/gin"
+	commonhandler "github.com/tee-nullpointer/go-common-kit/handler"
+	commonmiddleware "github.com/tee-nullpointer/go-common-kit/middleware"
+	"github.com/tee-nullpointer/go-common-kit/pkg/env"
+	"github.com/tee-nullpointer/go-common-kit/pkg/logger"
+	"github.com/tee-nullpointer/go-common-kit/server"
 	"go.uber.org/zap"
 )
 
@@ -34,7 +34,7 @@ func main() {
 
 	ginServer := server.NewGinServer(ginMode)
 	ginServer.SetupRouter(setupRouter,
-		common_middleware.LoggingMiddleware())
+		commonmiddleware.LoggingMiddleware())
 	go ginServer.Start("localhost", ginPort)
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
@@ -46,7 +46,7 @@ func main() {
 func setupRouter(router *gin.Engine) {
 	monitor := router.Group("/")
 	{
-		monitor.GET("/health", common_handler.HealthCheck)
+		monitor.GET("/health", commonhandler.HealthCheck)
 	}
 	api := router.Group("/api/v1")
 	{
