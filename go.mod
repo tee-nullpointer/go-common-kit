@@ -1,4 +1,4 @@
-module go-common-kit
+module github.com/tee-nullpointer/go-common-kit
 
 go 1.25
 
