@@ -26,12 +26,6 @@ func NewGinServer(mode string) *GinServer {
 	}
 }
 
-func (s *GinServer) SetupRouter(setup func(r *gin.Engine), middlewares ...gin.HandlerFunc) {
-	s.router.Use(gin.Recovery())
-	s.router.Use(middlewares...)
-	setup(s.router)
-}
-
 func (s *GinServer) Start(host string, port string) {
 	s.server = &http.Server{
 		Addr:    fmt.Sprintf("%s:%s", host, port),
@@ -59,4 +53,8 @@ func (s *GinServer) GracefulShutdown() {
 		return
 	}
 	logger.Info("Server gracefully stopped")
+}
+
+func (s *GinServer) GetRouter() *gin.Engine {
+	return s.router
 }

@@ -33,8 +33,9 @@ func main() {
 	)
 
 	ginServer := server.NewGinServer(ginMode)
-	ginServer.SetupRouter(setupRouter,
-		commonmiddleware.LoggingMiddleware())
+	ginRouter := ginServer.GetRouter()
+	ginRouter.Use(gin.Recovery(), commonmiddleware.LoggingMiddleware())
+	setupRouter(ginRouter)
 	go ginServer.Start("localhost", ginPort)
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
