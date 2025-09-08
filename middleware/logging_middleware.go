@@ -21,8 +21,9 @@ func (w *responseWriter) Write(b []byte) (int, error) {
 
 func LoggingMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		l := logger.GetLogger(c.Request.Context())
 		start := time.Now()
-		logger.Info("HTTP Request",
+		l.Info("HTTP Request",
 			zap.String("method", c.Request.Method),
 			zap.String("path", c.Request.URL.Path),
 			zap.String("client_ip", c.ClientIP()),
@@ -39,7 +40,7 @@ func LoggingMiddleware() gin.HandlerFunc {
 
 		duration := time.Since(start)
 
-		logger.Info("HTTP Response",
+		l.Info("HTTP Response",
 			zap.Int("status_code", c.Writer.Status()),
 			zap.Duration("response_time", duration),
 			zap.Int("response_size", responseBody.Len()),

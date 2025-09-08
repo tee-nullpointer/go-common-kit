@@ -27,20 +27,20 @@ func main() {
 	ginMode := env.GetEnv("GIN_MODE", "release")
 	ginPort := env.GetEnv("GIN_PORT", "8080")
 
-	logger.Info("Starting Gin Http Server",
+	zap.L().Info("Starting Gin Http Server",
 		zap.String("port", ginPort),
 		zap.String("mode", ginMode),
 	)
 
 	ginServer := server.NewGinServer(ginMode)
 	ginRouter := ginServer.GetRouter()
-	ginRouter.Use(gin.Recovery(), commonmiddleware.LoggingMiddleware())
+	ginRouter.Use(gin.Recovery(), commonmiddleware.TraceMiddleware(), commonmiddleware.LoggingMiddleware())
 	setupRouter(ginRouter)
 	go ginServer.Start("localhost", ginPort)
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	sig := <-quit
-	logger.Info("Received shutdown signal", zap.String("signal", sig.String()))
+	zap.L().Info("Received shutdown signal", zap.String("signal", sig.String()))
 	ginServer.GracefulShutdown()
 }
 

@@ -1,12 +1,18 @@
 package logger
 
 import (
+	"context"
+
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
 
-var Logger *zap.Logger
-var Sugar *zap.SugaredLogger
+const LoggerKey = "logger"
+
+type Logger struct {
+	logger *zap.Logger
+	sugar  *zap.SugaredLogger
+}
 
 func InitLogger(level, format string) error {
 	var config zap.Config
@@ -34,57 +40,67 @@ func InitLogger(level, format string) error {
 	config.OutputPaths = []string{"stdout"}
 	config.ErrorOutputPaths = []string{"stderr"}
 
-	var err error
-	Logger, err = config.Build(zap.AddCallerSkip(1))
+	logger, err := config.Build(zap.AddCallerSkip(1))
 	if err != nil {
 		return err
 	}
-	Sugar = Logger.Sugar()
+	zap.ReplaceGlobals(logger)
 	return nil
 }
 
-func Info(msg string, fields ...zap.Field) {
-	Logger.Info(msg, fields...)
+func (l *Logger) Info(msg string, fields ...zap.Field) {
+	l.logger.Info(msg, fields...)
 }
 
-func Debug(msg string, fields ...zap.Field) {
-	Logger.Debug(msg, fields...)
+func (l *Logger) Debug(msg string, fields ...zap.Field) {
+	l.logger.Debug(msg, fields...)
 }
 
-func Error(msg string, fields ...zap.Field) {
-	Logger.Error(msg, fields...)
+func (l *Logger) Error(msg string, fields ...zap.Field) {
+	l.logger.Error(msg, fields...)
 }
 
-func Warn(msg string, fields ...zap.Field) {
-	Logger.Warn(msg, fields...)
+func (l *Logger) Warn(msg string, fields ...zap.Field) {
+	l.logger.Warn(msg, fields...)
 }
 
-func Fatal(msg string, fields ...zap.Field) {
-	Logger.Fatal(msg, fields...)
+func (l *Logger) Fatal(msg string, fields ...zap.Field) {
+	l.logger.Fatal(msg, fields...)
 }
 
-func SInfo(template string, args ...interface{}) {
-	Sugar.Infof(template, args...)
+func (l *Logger) SInfo(template string, args ...interface{}) {
+	l.sugar.Infof(template, args...)
 }
 
-func SDebug(template string, args ...interface{}) {
-	Sugar.Debugf(template, args...)
+func (l *Logger) SDebug(template string, args ...interface{}) {
+	l.sugar.Debugf(template, args...)
 }
 
-func SError(template string, args ...interface{}) {
-	Sugar.Errorf(template, args...)
+func (l *Logger) SError(template string, args ...interface{}) {
+	l.sugar.Errorf(template, args...)
 }
 
-func SWarn(template string, args ...interface{}) {
-	Sugar.Warnf(template, args...)
+func (l *Logger) SWarn(template string, args ...interface{}) {
+	l.sugar.Warnf(template, args...)
 }
 
-func SFatal(template string, args ...interface{}) {
-	Sugar.Fatalf(template, args...)
+func (l *Logger) SFatal(template string, args ...interface{}) {
+	l.sugar.Fatalf(template, args...)
 }
 
 func Sync() {
-	if Logger != nil {
-		Logger.Sync()
+	_ = zap.L().Sync()
+}
+
+func GetLogger(ctx context.Context) *Logger {
+	if l, ok := ctx.Value(LoggerKey).(*zap.Logger); ok {
+		return &Logger{
+			logger: l,
+			sugar:  l.Sugar(),
+		}
+	}
+	return &Logger{
+		logger: zap.L(),
+		sugar:  zap.L().Sugar(),
 	}
 }

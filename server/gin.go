@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/tee-nullpointer/go-common-kit/pkg/logger"
 	"go.uber.org/zap"
 )
 
@@ -16,6 +15,7 @@ type GinServer struct {
 	mode   string
 	router *gin.Engine
 	server *http.Server
+	logger *zap.Logger
 }
 
 func NewGinServer(mode string) *GinServer {
@@ -23,6 +23,7 @@ func NewGinServer(mode string) *GinServer {
 	return &GinServer{
 		mode:   mode,
 		router: gin.New(),
+		logger: zap.L(),
 	}
 }
 
@@ -31,28 +32,28 @@ func (s *GinServer) Start(host string, port string) {
 		Addr:    fmt.Sprintf("%s:%s", host, port),
 		Handler: s.router,
 	}
-	logger.Info("Gin Server starting", zap.String("address", s.server.Addr))
+	s.logger.Info("Gin Server starting", zap.String("address", s.server.Addr))
 	if err := s.server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-		logger.Fatal("Failed to start server", zap.Error(err))
+		s.logger.Fatal("Failed to start server", zap.Error(err))
 	}
 }
 
 func (s *GinServer) Shutdown() {
 	if err := s.server.Close(); err != nil {
-		logger.Error("Failed to stop Gin Server", zap.Error(err))
+		s.logger.Error("Failed to stop Gin Server", zap.Error(err))
 	}
-	logger.Info("Gin Server stopped")
+	s.logger.Info("Gin Server stopped")
 }
 
 func (s *GinServer) GracefulShutdown() {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
-	logger.Info("Initiating graceful shutdown...")
+	s.logger.Info("Initiating graceful shutdown...")
 	if err := s.server.Shutdown(ctx); err != nil {
-		logger.Error("Server forced to shutdown", zap.Error(err))
+		s.logger.Error("Server forced to shutdown", zap.Error(err))
 		return
 	}
-	logger.Info("Server gracefully stopped")
+	s.logger.Info("Server gracefully stopped")
 }
 
 func (s *GinServer) GetRouter() *gin.Engine {
